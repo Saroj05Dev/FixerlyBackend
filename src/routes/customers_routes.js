@@ -3,8 +3,8 @@ const { registerCustomer, getAllCustomers } = require("../controllers/customers_
 
 const customerRouter = express.Router();  
 
-customerRouter.post("/", registerCustomer);
-customerRouter.get("/", getAllCustomers);
+customerRouter.post("/add", registerCustomer);
+customerRouter.get("/getall", getAllCustomers);
 
 
 module.exports = customerRouter;
