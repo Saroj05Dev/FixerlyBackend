@@ -80,6 +80,14 @@ async function deleteSubService(req, res) {
         });
     }
 }
+async function getAllSubServices(req, res) {
+    try {
+        const subServices = await SubServiceService.getAllSubServices();
+        return res.status(200).json({ success: true, data: subServices });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: error.message });
+    }
+}
 
 module.exports = {
     createSubService,
@@ -87,4 +95,5 @@ module.exports = {
     getSubServicesByServiceId,
     updateSubService,
     deleteSubService,
+    getAllSubServices
 };

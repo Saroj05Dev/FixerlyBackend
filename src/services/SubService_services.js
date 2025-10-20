@@ -28,6 +28,12 @@ class SubServiceService {
         }
     }
 
+
+      async getAllSubServices() {
+        return await this.subServiceRepository.getAllSubServices();
+    }
+
+
     async getSubServicesByServiceId(serviceId) {
         try {
             if (!serviceId) throw new Error("Service ID is required");

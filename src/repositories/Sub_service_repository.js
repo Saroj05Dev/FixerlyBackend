@@ -10,7 +10,9 @@ class SubServiceRepository {
     async getSubServiceById(id) {
         return await SubService.findById(id).populate('serviceId');
     }
-
+    async getAllSubServices() {
+        return await SubService.find().populate('serviceId').sort({ createdAt: -1 });
+    }
     async getSubServicesByServiceId(serviceId) {
         return await SubService.find({ serviceId }).populate('serviceId');
     }

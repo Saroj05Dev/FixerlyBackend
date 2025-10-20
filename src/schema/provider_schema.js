@@ -1,17 +1,10 @@
 const mongoose = require("mongoose");
 
 const providerSchema = new mongoose.Schema({
-    id: {
-        type: Number,
-        required: true,
-        unique: true,
-        default: () => Math.floor(Math.random() * 1000000) // Example: Generate a random ID if not provided
-    },
     name: {
         type: String,
         required: [true, "Provider name is required"],
-        trim: true,
-        minlength: [10, "Provider name must be at least 10 characters"]
+        trim: true
     },
     email: {
         type: String,

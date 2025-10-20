@@ -1,7 +1,7 @@
-const ProviderService = require("../services/provider_service"); // Adjust path to your service file
+const ProviderService = require("../services/provider_service"); // Adjust path if needed
 
 class ProviderController {
-    // Create a new provider
+    // ✅ Create a new provider
     async createProvider(req, res) {
         try {
             const providerData = req.body;
@@ -19,11 +19,11 @@ class ProviderController {
         }
     }
 
-    // Get a provider by ID
+    // ✅ Get a provider by ID
     async getProviderById(req, res) {
         try {
             const { id } = req.params;
-            const provider = await ProviderService.getProviderById(parseInt(id));
+            const provider = await ProviderService.getProviderById(id);
             return res.status(200).json({
                 success: true,
                 data: provider,
@@ -36,7 +36,7 @@ class ProviderController {
         }
     }
 
-    // Get a provider by email
+    // ✅ Get a provider by email
     async getProviderByEmail(req, res) {
         try {
             const { email } = req.query;
@@ -53,7 +53,7 @@ class ProviderController {
         }
     }
 
-    // Get providers by service ID
+    // ✅ Get providers by service ID
     async getProvidersByServiceId(req, res) {
         try {
             const { serviceId } = req.params;
@@ -70,7 +70,7 @@ class ProviderController {
         }
     }
 
-    // Get all verified providers
+    // ✅ Get all verified providers
     async getVerifiedProviders(req, res) {
         try {
             const providers = await ProviderService.getVerifiedProviders();
@@ -86,12 +86,12 @@ class ProviderController {
         }
     }
 
-    // Update a provider
+    // ✅ Update a provider
     async updateProvider(req, res) {
         try {
             const { id } = req.params;
             const updateData = req.body;
-            const provider = await ProviderService.updateProvider(parseInt(id), updateData);
+            const provider = await ProviderService.updateProvider(id, updateData);
             return res.status(200).json({
                 success: true,
                 message: "Provider updated successfully",
@@ -105,11 +105,11 @@ class ProviderController {
         }
     }
 
-    // Delete a provider
+    // ✅ Delete a provider
     async deleteProvider(req, res) {
         try {
             const { id } = req.params;
-            const provider = await ProviderService.deleteProvider(parseInt(id));
+            const provider = await ProviderService.deleteProvider(id);
             return res.status(200).json({
                 success: true,
                 message: "Provider deleted successfully",
@@ -123,13 +123,11 @@ class ProviderController {
         }
     }
 
-    // Get all providers with pagination and filters
+    // ✅ Get all providers (without pagination)
     async getAllProviders(req, res) {
         try {
-            const { page, limit, serviceId, minRating } = req.query;
+            const { serviceId, minRating } = req.query;
             const providers = await ProviderService.getAllProviders({
-                page: parseInt(page) || 1,
-                limit: parseInt(limit) || 10,
                 serviceId,
                 minRating: minRating ? parseFloat(minRating) : undefined,
             });
@@ -145,11 +143,11 @@ class ProviderController {
         }
     }
 
-    // Verify a provider
+    // ✅ Verify a provider
     async verifyProvider(req, res) {
         try {
             const { id } = req.params;
-            const provider = await ProviderService.verifyProvider(parseInt(id));
+            const provider = await ProviderService.verifyProvider(id);
             return res.status(200).json({
                 success: true,
                 message: "Provider verified successfully",

@@ -1,5 +1,5 @@
-const ProviderRepository = require("../repositories/provider_repository"); 
-const bcrypt = require("bcrypt"); // For password hashing
+const ProviderRepository = require("../repositories/provider_repository");
+const bcrypt = require("bcrypt");
 const { isValidObjectId } = require("mongoose");
 
 class ProviderService {
@@ -7,7 +7,7 @@ class ProviderService {
         this.providerRepository = ProviderRepository;
     }
 
-    // Create a new provider with password hashing
+    // ✅ Create a new provider with password hashing
     async createProvider(providerData) {
         try {
             // Validate required fields
@@ -28,67 +28,56 @@ class ProviderService {
             // Hash password
             const saltRounds = 10;
             providerData.password_hash = await bcrypt.hash(providerData.password, saltRounds);
-            delete providerData.password; // Remove plain password from data
+            delete providerData.password; // Remove plain password
 
-            // Generate a unique custom ID if not provided
-            if (!providerData.id) {
-                providerData.id = await this.generateUniqueId();
-            }
-
+            // Save provider
             return await this.providerRepository.createProvider(providerData);
         } catch (error) {
             throw new Error(`Service error: Failed to create provider - ${error.message}`);
         }
     }
 
-    // Generate a unique custom ID
-    async generateUniqueId() {
-        let id;
-        let isUnique = false;
-        do {
-            id = Math.floor(Math.random() * 1000000);
-            const existingProvider = await this.providerRepository.getProviderById(id);
-            if (!existingProvider) isUnique = true;
-        } while (!isUnique);
-        return id;
-    }
-
-    // Get a provider by ID
+    // ✅ Get provider by MongoDB _id
     async getProviderById(id) {
         try {
             if (!id) throw new Error("Provider ID is required");
+            if (!isValidObjectId(id)) throw new Error("Invalid provider ID format");
+
             const provider = await this.providerRepository.getProviderById(id);
             if (!provider) throw new Error("Provider not found");
+
             return provider;
         } catch (error) {
             throw new Error(`Service error: Failed to get provider - ${error.message}`);
         }
     }
 
-    // Get a provider by email
+    // ✅ Get provider by email
     async getProviderByEmail(email) {
         try {
             if (!email) throw new Error("Email is required");
+
             const provider = await this.providerRepository.getProviderByEmail(email);
             if (!provider) throw new Error("Provider not found");
+
             return provider;
         } catch (error) {
             throw new Error(`Service error: Failed to get provider by email - ${error.message}`);
         }
     }
 
-    // Get providers by service ID
+    // ✅ Get providers by service ID
     async getProvidersByServiceId(serviceId) {
         try {
             if (!isValidObjectId(serviceId)) throw new Error("Invalid service_id format");
-            const providers = await this.providerRepository.getProvidersByServiceId(serviceId);
-            return providers;
+
+            return await this.providerRepository.getProvidersByServiceId(serviceId);
         } catch (error) {
             throw new Error(`Service error: Failed to get providers by service ID - ${error.message}`);
         }
     }
 
-    // Get all verified providers
+    // ✅ Get all verified providers
     async getVerifiedProviders() {
         try {
             return await this.providerRepository.getVerifiedProviders();
@@ -97,15 +86,14 @@ class ProviderService {
         }
     }
 
-    // Update a provider
+    // ✅ Update provider details
     async updateProvider(id, updateData) {
         try {
             if (!id) throw new Error("Provider ID is required");
+            if (!isValidObjectId(id)) throw new Error("Invalid provider ID format");
 
-            // Prevent updating the ID field
-            if (updateData.id) {
-                throw new Error("Cannot update provider ID");
-            }
+            // Prevent updating _id
+            if (updateData._id) delete updateData._id;
 
             // Hash password if provided
             if (updateData.password) {
@@ -114,7 +102,7 @@ class ProviderService {
                 delete updateData.password;
             }
 
-            // Validate service_id and sub_service_id if provided
+            // Validate service IDs
             if (updateData.service_id && !isValidObjectId(updateData.service_id)) {
                 throw new Error("Invalid service_id format");
             }
@@ -124,43 +112,49 @@ class ProviderService {
 
             const provider = await this.providerRepository.updateProvider(id, updateData);
             if (!provider) throw new Error("Provider not found");
+
             return provider;
         } catch (error) {
             throw new Error(`Service error: Failed to update provider - ${error.message}`);
         }
     }
 
-    // Delete a provider
+    // ✅ Delete provider
     async deleteProvider(id) {
         try {
             if (!id) throw new Error("Provider ID is required");
+            if (!isValidObjectId(id)) throw new Error("Invalid provider ID format");
+
             const provider = await this.providerRepository.deleteProvider(id);
             if (!provider) throw new Error("Provider not found");
+
             return provider;
         } catch (error) {
             throw new Error(`Service error: Failed to delete provider - ${error.message}`);
         }
     }
 
-    // Get all providers with filters and pagination
-    async getAllProviders({ page = 1, limit = 10, serviceId, minRating }) {
+    // ✅ Get all providers (no pagination)
+    async getAllProviders({ serviceId, minRating } = {}) {
         try {
-            if (page < 1 || limit < 1) throw new Error("Invalid pagination parameters");
             if (serviceId && !isValidObjectId(serviceId)) throw new Error("Invalid service_id format");
             if (minRating && (minRating < 0 || minRating > 5)) throw new Error("Invalid rating range");
 
-            return await this.providerRepository.getAllProviders({ page, limit, serviceId, minRating });
+            return await this.providerRepository.getAllProviders({ serviceId, minRating });
         } catch (error) {
             throw new Error(`Service error: Failed to get providers - ${error.message}`);
         }
     }
 
-    // Verify a provider
+    // ✅ Verify provider (set verified = true)
     async verifyProvider(id) {
         try {
             if (!id) throw new Error("Provider ID is required");
+            if (!isValidObjectId(id)) throw new Error("Invalid provider ID format");
+
             const provider = await this.providerRepository.updateProvider(id, { verified: true });
             if (!provider) throw new Error("Provider not found");
+
             return provider;
         } catch (error) {
             throw new Error(`Service error: Failed to verify provider - ${error.message}`);
