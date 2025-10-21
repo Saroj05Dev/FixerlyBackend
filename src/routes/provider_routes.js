@@ -1,33 +1,37 @@
 const express = require("express");
 const ProviderController = require("../controllers/provider_controller");
+const { authenticateToken } = require("../../auth_middleware");
 
 const router = express.Router();
 
-// ✅ Create a new provider
+// Create a new provider (public)
 router.post("/add", ProviderController.createProvider);
 
-// ✅ Get all providers (no pagination)
+// Login provider (public)
+router.post("/login", ProviderController.loginProvider);
+
+// Get all providers (no pagination, public)
 router.get("/all", ProviderController.getAllProviders);
 
-// ✅ Get all verified providers
+// Get all verified providers (public)
 router.get("/verified", ProviderController.getVerifiedProviders);
 
-// ✅ Get providers by service ID
+// Get providers by service ID (public)
 router.get("/service/:serviceId", ProviderController.getProvidersByServiceId);
 
-// ✅ Get a provider by email (query parameter ?email=)
+// Get a provider by email (query parameter ?email=, public)
 router.get("/by-email", ProviderController.getProviderByEmail);
 
-// ✅ Get a provider by ID
+// Get a provider by ID (public)
 router.get("/:id", ProviderController.getProviderById);
 
-// ✅ Update a provider
-router.patch("/:id", ProviderController.updateProvider);
+// Update a provider (protected)
+router.patch("/:id", authenticateToken, ProviderController.updateProvider);
 
-// ✅ Verify a provider
-router.patch("/:id/verify", ProviderController.verifyProvider);
+// Verify a provider (protected, typically for admins)
+router.patch("/:id/verify", authenticateToken, ProviderController.verifyProvider);
 
-// ✅ Delete a provider
-router.delete("/:id", ProviderController.deleteProvider);
+// Delete a provider (protected)
+router.delete("/:id", authenticateToken, ProviderController.deleteProvider);
 
 module.exports = router;
