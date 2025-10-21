@@ -1,165 +1,159 @@
+const bcrypt = require("bcryptjs");
 const ProviderRepository = require("../repositories/provider_repository");
-const bcrypt = require("bcrypt");
 const { isValidObjectId } = require("mongoose");
 
-class ProviderService {
-    constructor() {
-        this.providerRepository = ProviderRepository;
-    }
+// ✅ Create a new provider
+async function createProvider(providerData) {
+    try {
+        const { name, email, phone, password, service_id, sub_service_id } = providerData;
 
-    // ✅ Create a new provider with password hashing
-    async createProvider(providerData) {
-        try {
-            // Validate required fields
-            if (!providerData.name || !providerData.email || !providerData.phone || !providerData.password || !providerData.service_id) {
-                throw new Error("Missing required fields: name, email, phone, password, or service_id");
-            }
-
-            // Validate service_id format
-            if (!isValidObjectId(providerData.service_id)) {
-                throw new Error("Invalid service_id format");
-            }
-
-            // Validate sub_service_id if provided
-            if (providerData.sub_service_id && !isValidObjectId(providerData.sub_service_id)) {
-                throw new Error("Invalid sub_service_id format");
-            }
-
-            // Hash password
-            const saltRounds = 10;
-            providerData.password_hash = await bcrypt.hash(providerData.password, saltRounds);
-            delete providerData.password; // Remove plain password
-
-            // Save provider
-            return await this.providerRepository.createProvider(providerData);
-        } catch (error) {
-            throw new Error(`Service error: Failed to create provider - ${error.message}`);
+        if (!name || !email || !phone || !password || !service_id) {
+            throw { reason: "Missing required fields", statusCode: 400 };
         }
-    }
 
-    // ✅ Get provider by MongoDB _id
-    async getProviderById(id) {
-        try {
-            if (!id) throw new Error("Provider ID is required");
-            if (!isValidObjectId(id)) throw new Error("Invalid provider ID format");
+        if (!isValidObjectId(service_id)) throw { reason: "Invalid service_id format", statusCode: 400 };
+        if (sub_service_id && !isValidObjectId(sub_service_id)) throw { reason: "Invalid sub_service_id format", statusCode: 400 };
 
-            const provider = await this.providerRepository.getProviderById(id);
-            if (!provider) throw new Error("Provider not found");
+        const password_hash = await bcrypt.hash(password, 10);
 
-            return provider;
-        } catch (error) {
-            throw new Error(`Service error: Failed to get provider - ${error.message}`);
-        }
-    }
+        const newProvider = await ProviderRepository.createProvider({
+            ...providerData,
+            password_hash,
+            password: undefined
+        });
 
-    // ✅ Get provider by email
-    async getProviderByEmail(email) {
-        try {
-            if (!email) throw new Error("Email is required");
+        if (!newProvider) throw { reason: "Failed to create provider", statusCode: 500 };
 
-            const provider = await this.providerRepository.getProviderByEmail(email);
-            if (!provider) throw new Error("Provider not found");
-
-            return provider;
-        } catch (error) {
-            throw new Error(`Service error: Failed to get provider by email - ${error.message}`);
-        }
-    }
-
-    // ✅ Get providers by service ID
-    async getProvidersByServiceId(serviceId) {
-        try {
-            if (!isValidObjectId(serviceId)) throw new Error("Invalid service_id format");
-
-            return await this.providerRepository.getProvidersByServiceId(serviceId);
-        } catch (error) {
-            throw new Error(`Service error: Failed to get providers by service ID - ${error.message}`);
-        }
-    }
-
-    // ✅ Get all verified providers
-    async getVerifiedProviders() {
-        try {
-            return await this.providerRepository.getVerifiedProviders();
-        } catch (error) {
-            throw new Error(`Service error: Failed to get verified providers - ${error.message}`);
-        }
-    }
-
-    // ✅ Update provider details
-    async updateProvider(id, updateData) {
-        try {
-            if (!id) throw new Error("Provider ID is required");
-            if (!isValidObjectId(id)) throw new Error("Invalid provider ID format");
-
-            // Prevent updating _id
-            if (updateData._id) delete updateData._id;
-
-            // Hash password if provided
-            if (updateData.password) {
-                const saltRounds = 10;
-                updateData.password_hash = await bcrypt.hash(updateData.password, saltRounds);
-                delete updateData.password;
-            }
-
-            // Validate service IDs
-            if (updateData.service_id && !isValidObjectId(updateData.service_id)) {
-                throw new Error("Invalid service_id format");
-            }
-            if (updateData.sub_service_id && !isValidObjectId(updateData.sub_service_id)) {
-                throw new Error("Invalid sub_service_id format");
-            }
-
-            const provider = await this.providerRepository.updateProvider(id, updateData);
-            if (!provider) throw new Error("Provider not found");
-
-            return provider;
-        } catch (error) {
-            throw new Error(`Service error: Failed to update provider - ${error.message}`);
-        }
-    }
-
-    // ✅ Delete provider
-    async deleteProvider(id) {
-        try {
-            if (!id) throw new Error("Provider ID is required");
-            if (!isValidObjectId(id)) throw new Error("Invalid provider ID format");
-
-            const provider = await this.providerRepository.deleteProvider(id);
-            if (!provider) throw new Error("Provider not found");
-
-            return provider;
-        } catch (error) {
-            throw new Error(`Service error: Failed to delete provider - ${error.message}`);
-        }
-    }
-
-    // ✅ Get all providers (no pagination)
-    async getAllProviders({ serviceId, minRating } = {}) {
-        try {
-            if (serviceId && !isValidObjectId(serviceId)) throw new Error("Invalid service_id format");
-            if (minRating && (minRating < 0 || minRating > 5)) throw new Error("Invalid rating range");
-
-            return await this.providerRepository.getAllProviders({ serviceId, minRating });
-        } catch (error) {
-            throw new Error(`Service error: Failed to get providers - ${error.message}`);
-        }
-    }
-
-    // ✅ Verify provider (set verified = true)
-    async verifyProvider(id) {
-        try {
-            if (!id) throw new Error("Provider ID is required");
-            if (!isValidObjectId(id)) throw new Error("Invalid provider ID format");
-
-            const provider = await this.providerRepository.updateProvider(id, { verified: true });
-            if (!provider) throw new Error("Provider not found");
-
-            return provider;
-        } catch (error) {
-            throw new Error(`Service error: Failed to verify provider - ${error.message}`);
-        }
+        return newProvider;
+    } catch (error) {
+        throw error.reason ? error : { reason: `Service error: Failed to create provider - ${error.message}`, statusCode: 500 };
     }
 }
 
-module.exports = new ProviderService();
+// ✅ Get provider by ID
+async function getProviderById(id) {
+    try {
+        if (!id) throw { reason: "Provider ID is required", statusCode: 400 };
+        if (!isValidObjectId(id)) throw { reason: "Invalid provider ID format", statusCode: 400 };
+
+        const provider = await ProviderRepository.getProviderById(id);
+        if (!provider) throw { reason: "Provider not found", statusCode: 404 };
+
+        return provider;
+    } catch (error) {
+        throw error.reason ? error : { reason: `Service error: Failed to get provider - ${error.message}`, statusCode: 500 };
+    }
+}
+
+// ✅ Get provider by email
+async function getProviderByEmail(email) {
+    try {
+        if (!email) throw { reason: "Email is required", statusCode: 400 };
+
+        const provider = await ProviderRepository.getProviderByEmail(email);
+        if (!provider) throw { reason: "Provider not found", statusCode: 404 };
+
+        return provider;
+    } catch (error) {
+        throw error.reason ? error : { reason: `Service error: Failed to get provider by email - ${error.message}`, statusCode: 500 };
+    }
+}
+
+// ✅ Get providers by service ID
+async function getProvidersByServiceId(serviceId) {
+    try {
+        if (!isValidObjectId(serviceId)) throw { reason: "Invalid service_id format", statusCode: 400 };
+
+        return await ProviderRepository.getProvidersByServiceId(serviceId);
+    } catch (error) {
+        throw error.reason ? error : { reason: `Service error: Failed to get providers by service ID - ${error.message}`, statusCode: 500 };
+    }
+}
+
+// ✅ Get all verified providers
+async function getVerifiedProviders() {
+    try {
+        return await ProviderRepository.getVerifiedProviders();
+    } catch (error) {
+        throw { reason: `Service error: Failed to get verified providers - ${error.message}`, statusCode: 500 };
+    }
+}
+
+// ✅ Update provider
+async function updateProvider(id, updateData) {
+    try {
+        if (!id) throw { reason: "Provider ID is required", statusCode: 400 };
+        if (!isValidObjectId(id)) throw { reason: "Invalid provider ID format", statusCode: 400 };
+
+        if (updateData._id) delete updateData._id;
+
+        if (updateData.password) {
+            updateData.password_hash = await bcrypt.hash(updateData.password, 10);
+            delete updateData.password;
+        }
+
+        if (updateData.service_id && !isValidObjectId(updateData.service_id)) throw { reason: "Invalid service_id format", statusCode: 400 };
+        if (updateData.sub_service_id && !isValidObjectId(updateData.sub_service_id)) throw { reason: "Invalid sub_service_id format", statusCode: 400 };
+
+        const provider = await ProviderRepository.updateProvider(id, updateData);
+        if (!provider) throw { reason: "Provider not found", statusCode: 404 };
+
+        return provider;
+    } catch (error) {
+        throw error.reason ? error : { reason: `Service error: Failed to update provider - ${error.message}`, statusCode: 500 };
+    }
+}
+
+// ✅ Delete provider
+async function deleteProvider(id) {
+    try {
+        if (!id) throw { reason: "Provider ID is required", statusCode: 400 };
+        if (!isValidObjectId(id)) throw { reason: "Invalid provider ID format", statusCode: 400 };
+
+        const provider = await ProviderRepository.deleteProvider(id);
+        if (!provider) throw { reason: "Provider not found", statusCode: 404 };
+
+        return provider;
+    } catch (error) {
+        throw error.reason ? error : { reason: `Service error: Failed to delete provider - ${error.message}`, statusCode: 500 };
+    }
+}
+
+// ✅ Get all providers
+async function getAllProviders({ serviceId, minRating } = {}) {
+    try {
+        if (serviceId && !isValidObjectId(serviceId)) throw { reason: "Invalid service_id format", statusCode: 400 };
+        if (minRating && (minRating < 0 || minRating > 5)) throw { reason: "Invalid rating range", statusCode: 400 };
+
+        return await ProviderRepository.getAllProviders({ serviceId, minRating });
+    } catch (error) {
+        throw { reason: `Service error: Failed to get providers - ${error.message}`, statusCode: 500 };
+    }
+}
+
+// ✅ Verify provider
+async function verifyProvider(id) {
+    try {
+        if (!id) throw { reason: "Provider ID is required", statusCode: 400 };
+        if (!isValidObjectId(id)) throw { reason: "Invalid provider ID format", statusCode: 400 };
+
+        const provider = await ProviderRepository.updateProvider(id, { verified: true });
+        if (!provider) throw { reason: "Provider not found", statusCode: 404 };
+
+        return provider;
+    } catch (error) {
+        throw { reason: `Service error: Failed to verify provider - ${error.message}`, statusCode: 500 };
+    }
+}
+
+module.exports = {
+    createProvider,
+    getProviderById,
+    getProviderByEmail,
+    getProvidersByServiceId,
+    getVerifiedProviders,
+    updateProvider,
+    deleteProvider,
+    getAllProviders,
+    verifyProvider,
+};

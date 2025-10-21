@@ -1,7 +1,6 @@
-const ProviderService = require("../services/provider_service"); // Adjust path if needed
+const ProviderService = require("../services/provider_service"); 
 
 class ProviderController {
-    // ✅ Create a new provider
     async createProvider(req, res) {
         try {
             const providerData = req.body;
@@ -19,7 +18,6 @@ class ProviderController {
         }
     }
 
-    // ✅ Get a provider by ID
     async getProviderById(req, res) {
         try {
             const { id } = req.params;
@@ -36,7 +34,6 @@ class ProviderController {
         }
     }
 
-    // ✅ Get a provider by email
     async getProviderByEmail(req, res) {
         try {
             const { email } = req.query;
@@ -53,7 +50,6 @@ class ProviderController {
         }
     }
 
-    // ✅ Get providers by service ID
     async getProvidersByServiceId(req, res) {
         try {
             const { serviceId } = req.params;
@@ -70,7 +66,6 @@ class ProviderController {
         }
     }
 
-    // ✅ Get all verified providers
     async getVerifiedProviders(req, res) {
         try {
             const providers = await ProviderService.getVerifiedProviders();
@@ -86,7 +81,6 @@ class ProviderController {
         }
     }
 
-    // ✅ Update a provider
     async updateProvider(req, res) {
         try {
             const { id } = req.params;
@@ -105,7 +99,6 @@ class ProviderController {
         }
     }
 
-    // ✅ Delete a provider
     async deleteProvider(req, res) {
         try {
             const { id } = req.params;
@@ -123,7 +116,6 @@ class ProviderController {
         }
     }
 
-    // ✅ Get all providers (without pagination)
     async getAllProviders(req, res) {
         try {
             const { serviceId, minRating } = req.query;
@@ -143,7 +135,6 @@ class ProviderController {
         }
     }
 
-    // ✅ Verify a provider
     async verifyProvider(req, res) {
         try {
             const { id } = req.params;

@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const Provider = require("../schema/provider_schema"); // adjust path if needed
+const Provider = require("../schema/provider_schema");
 
 class ProviderRepository {
     // ✅ Create a new provider
