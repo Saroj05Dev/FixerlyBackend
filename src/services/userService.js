@@ -1,35 +1,32 @@
 const { findUser, createUser } = require("../repositories/userRepository");
+const { findOtp } = require("../repositories/otpRepository");
 
 async function registerUser(userDetails) {
+    const user = await findUser({ email: userDetails.email });
+    const existingPhone = await findUser({ phone: userDetails.phone });
 
-    //1. We need to check if the user with the email and phone is already exists.
-    const user = await findUser({
-        email: userDetails.email,
-        phone: userDetails.phone
-    });
-
-    //2. If found don't create
-    if(user) {
-        throw { reason: "User with the given phone and email already exists", statusCode: 400 }
+    if (user || existingPhone) {
+        throw { reason: "User with this email or phone already exists", statusCode: 400 };
     }
 
-    //3. If not then create a new user in DB
-    const newUser = createUser({
+    // ensure OTP was verified (no OTP doc should exist now)
+    const otpStillExists = await findOtp(userDetails.phone);
+    if (otpStillExists) {
+        throw { reason: "Phone number not verified yet", statusCode: 400 };
+    }
+
+    const newUser = await createUser({
         name: userDetails.name,
         email: userDetails.email,
         password: userDetails.password,
-        phone: userDetails.phone
+        phone: userDetails.phone,
+        role: userDetails.role,
+        isVerified: true // set verified after OTP check
     });
 
-    if(!newUser) {
-        throw { reason: "Something went wrong can't create user", statuscode: 500 }
-    }
+    if (!newUser) throw { reason: "Something went wrong creating user", statusCode: 500 };
 
-    //4. Return the details of create user
     return newUser;
-
 }
 
-module.exports = {
-    registerUser
-}
+module.exports = { registerUser };
