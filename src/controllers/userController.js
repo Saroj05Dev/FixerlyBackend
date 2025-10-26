@@ -1,5 +1,51 @@
-const { registerUser } = require("../services/userService");
+const { registerUser, getUserProfile, updateUserProfile } = require("../services/userService");
 const { sendOtp, verifyOtp } = require("../services/otpService");
+
+async function getProfile(req, res) {
+    try {
+        const userId = req.user.id;
+        const user = await getUserProfile(userId);
+
+        return res.status(200).json({
+            message: "Successfully fetched user profile",
+            success: true,
+            data: user,
+            error: {}
+        })
+    } catch (error) {
+        return res.status(error.statusCode || 500).json({
+            message: "Couldn't fetch user profile",
+            success: false,
+            error: error.reason || "Something went wrong"
+        })
+    }
+}
+
+async function updateProfile(req, res) {
+    try {
+        const userId = req.user.id;
+        const updateData = req.body;
+        
+        // Ensure no attempt to change role or ID
+        delete updateData.role;
+        delete updateData._id;
+
+        const updatedUser = await updateUserProfile(userId, updateData);
+
+        return res.status(200).json({
+            message: "User profile updated successfully",
+            success: true,
+            data: updatedUser,
+            error: {}
+        });
+    } catch (error) {
+        return res.status(error.statusCode || 500).json({
+            message: error.reason || "Failed to update user profile",
+            success: false,
+            error: error.reason || "Something went wrong"
+        });
+    }
+}
 
 async function sendOtpToUser(req, res) {
     try {
@@ -41,4 +87,10 @@ async function createUser(req, res) {
     }
 }
 
-module.exports = { createUser, sendOtpToUser, verifyUserOtp };
+module.exports = { 
+    getProfile,
+    updateProfile,
+    createUser, 
+    sendOtpToUser, 
+    verifyUserOtp,
+};
