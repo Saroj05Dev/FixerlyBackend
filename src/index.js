@@ -8,6 +8,8 @@ const subServiceRoutes = require('./routes/Sub_services_routes');
 const bookingRoutes = require('./routes/booking_routes');
 const userRouter = require('./routes/userRoutes');
 const authRouter = require('./routes/authRoutes');
+const provideroutes = require('./routes/Provider_routes');
+const reviewroutes = require('./routes/review_routes');
 const app = express();
 
 app.use(express.json());
@@ -20,9 +22,9 @@ app.use('/api/auth', authRouter);
 
 app.use('/api/services', serviceRoutes);
 app.use('/api/sub-services', subServiceRoutes);
-
+app.use('/api/reviews',reviewroutes);
 app.use('/api/booking', bookingRoutes);
-
+app.use('/api/provider',provideroutes);
 app.listen(ServerConfig.PORT, async () => {
     await connectDB();
     console.log(`Server started at port ${ServerConfig.PORT}...!!`);

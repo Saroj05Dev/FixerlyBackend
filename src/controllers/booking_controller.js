@@ -1,36 +1,46 @@
-const { registerBooking, getAllBookingsService } = require("../services/booking_service");
+// src/controllers/booking_controller.js
+const { getCustomerBookingsService, cancelBookingService, getProviderBookingsService, updateBookingStatusService,createBookingService,
+    getAllBookingsService } = require("../services/booking_service");
 
-async function addBooking(req, res) {
+async function getCustomerBookings(req, res) {
+    try { return res.status(200).json({ success: true, data: await getCustomerBookingsService(req.user.id) }); }
+    catch (e) { return res.status(e.statusCode || 500).json({ success: false, error: e.reason }); }
+}
+async function createBooking(req, res) {
     try {
-        const booking = await registerBooking(req.body);
-        return res.status(201).json({
-            success: true,
-            message: "Booking created successfully",
-            data: booking
-        });
-    } catch (error) {
-        return res.status(error.statusCode || 500).json({
-            success: false,
-            message: error.reason || "Error creating booking",
-            error: error
-        });
+        const booking = await createBookingService(req.user.id, req.body);
+        return res.status(201).json({ success: true, data: booking });
+    } catch (e) {
+        return res.status(e.statusCode || 500).json({ success: false, error: e.reason });
     }
 }
+
+
 
 async function getAllBookings(req, res) {
     try {
         const bookings = await getAllBookingsService();
-        return res.status(200).json({
-            success: true,
-            data: bookings
-        });
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Error fetching bookings",
-            error: error
-        });
+        return res.status(200).json({ success: true, data: bookings });
+    } catch (e) {
+        return res.status(e.statusCode || 500).json({ success: false, error: e.reason });
     }
 }
+async function cancelBooking(req, res) {
+    try { return res.status(200).json({ success: true, data: await cancelBookingService(req.params.id, req.user.id) }); }
+    catch (e) { return res.status(e.statusCode || 500).json({ success: false, error: e.reason }); }
+}
 
-module.exports = { addBooking, getAllBookings };
+async function getProviderBookings(req, res) {
+    try { return res.status(200).json({ success: true, data: await getProviderBookingsService(req.user.id) }); }
+    catch (e) { return res.status(e.statusCode || 500).json({ success: false, error: e.reason }); }
+}
+
+async function updateBookingStatus(req, res) {
+    try { return res.status(200).json({ success: true, data: await updateBookingStatusService(req.params.id, req.user.id, req.body.status) }); }
+    catch (e) { return res.status(e.statusCode || 500).json({ success: false, error: e.reason }); }
+}
+
+module.exports = { getCustomerBookings, cancelBooking, getProviderBookings, updateBookingStatus,
+    createBooking,    
+    getAllBookings
+};

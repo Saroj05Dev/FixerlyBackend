@@ -1,43 +1,21 @@
+// src/repositories/booking_repository.js
 const Booking = require("../schema/booking_schema");
 
-// 🟢 Create new booking
-async function createBooking(data) {
-  try {
-    const res = await Booking.create(data);
-    return res;
-  } catch (error) {
-    console.log("Error in createBooking:", error);
-  }
+async function findBookingById(id) { return await Booking.findById(id); }
+async function getCustomerBookings(id) { return await Booking.find({ customer_id: id }).populate('provider_id', 'name phone rates').populate('service_id', 'title').sort({ date: -1 }); }
+async function getProviderBookings(id) { return await Booking.find({ provider_id: id }).populate('customer_id', 'name phone').populate('service_id', 'title').sort({ date: -1 }); }
+async function updateBookingStatus(id, status) { return await Booking.findByIdAndUpdate(id, { status }, { new: true }); }
+async function createBooking(bookingData) {
+    const booking = new Booking(bookingData);
+    return await booking.save();
 }
 
-// 🟢 Fetch all bookings
-async function getAllBookingsRepo() {
-  try {
-    const res = await Booking.find()
-      .populate("customer_id")
-      .populate("provider_id")
-      .populate("service_id");
-    return res;
-  } catch (error) {
-    console.log("Error in getAllBookingsRepo:", error);
-  }
+async function getAllBookings() {
+    return await Booking.find({})
+        .populate('customer_id', 'name phone')
+        .populate('provider_id', 'name phone rates')
+        .populate('service_id', 'title')
+        .sort({ date: -1 });
 }
-
-// 🟢 Find booking by ID
-async function findBookingById(id) {
-  try {
-    const res = await Booking.findById(id)
-      .populate("customer_id")
-      .populate("provider_id")
-      .populate("service_id");
-    return res;
-  } catch (error) {
-    console.log("Error in findBookingById:", error);
-  }
-}
-
-module.exports = {
-  createBooking,
-  getAllBookingsRepo,
-  findBookingById
-};
+module.exports = { findBookingById, getCustomerBookings, getProviderBookings, updateBookingStatus,createBooking,        // ← NEW
+    getAllBookings };
