@@ -1,37 +1,30 @@
-const {
-    createBooking,
-    getAllBookingsRepo,
-    getBookingsByUserId 
-} = require("../repositories/booking_repositories");
+// src/services/booking_service.js
+const { getCustomerBookings, getProviderBookings, updateBookingStatus, findBookingById ,createBooking, getAllBookings} = require("../repositories/booking_repositories");
 
 async function registerBooking(bookingDetails) {
-    const { user_id, provider_id, service_id, status, address, lat, long, amount, date } = bookingDetails;
+    const { customer_id, provider_id, service_id, status, address, lat, long, amount, date } = bookingDetails;
 
-    if (!user_id || !provider_id || !service_id) {
-        throw { reason: "User, provider, and service are required", statusCode: 400 };
+    if (!customer_id || !provider_id || !service_id) {
+        throw { reason: "Customer, provider, and service are required", statusCode: 400 };
     }
 
     const newBooking = await createBooking({
-        user_id,
+        customer_id,
         provider_id,
         service_id,
-        status,
         address,
-        lat,
-        long,
+        lat: lat ?? null,
+        long: long ?? null,
         amount,
-        date: date || new Date()
-    });
+        // status & date are set by schema defaults
+    };
 
-    if (!newBooking) {
-        throw { reason: "Failed to create booking", statusCode: 500 };
-    }
-
-    return newBooking;
+    return await createBooking(bookingData);
 }
 
+
 async function getAllBookingsService() {
-    return await getAllBookingsRepo();
+    return await getAllBookings();
 }
 
 async function getUserBookingsService(userId) {
@@ -46,6 +39,5 @@ async function getUserBookingsService(userId) {
 
 module.exports = {
     registerBooking,
-    getAllBookingsService,
-    getUserBookingsService
+    getAllBookingsService
 };

@@ -1,11 +1,11 @@
 const { loginUser } = require("../services/authService");
-
 async function login(req, res) {
     const loginPayload = req.body;
 
     try {
         const user = await loginUser(loginPayload);
 
+        // Store token in cookie (optional, for browsers)
         res.cookie("authToken", user.token, {
             httpOnly: true,
             secure: false,
@@ -13,19 +13,22 @@ async function login(req, res) {
             maxAge: 1000 * 60 * 60 
         });
 
+        // 🔥 Return token in response so Thunder Client can use it
         res.status(200).json({
             success: true,
             message: "Logged in successfully",
             data: {
+                token: user.token,         // 👈 add this line
                 userRole: user.role,
                 userData: user.userData
             },
             error: {}
-        })
+        });
+
     } catch (error) {
         res.status(error.statusCode || 500).json({
             success: false,
-            message: error.message,
+            message: error.message || error.reason,
             error: error
         });
     }
