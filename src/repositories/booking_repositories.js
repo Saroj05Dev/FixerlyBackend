@@ -1,6 +1,6 @@
 const Booking = require("../schema/booking_schema");
 
-// 🟢 Create new booking
+// Create a new booking
 async function createBooking(data) {
   try {
     const res = await Booking.create(data);
@@ -10,11 +10,11 @@ async function createBooking(data) {
   }
 }
 
-// 🟢 Fetch all bookings
+// Get all bookings
 async function getAllBookingsRepo() {
   try {
     const res = await Booking.find()
-      .populate("customer_id")
+      .populate("user_id")       // changed from customer_id
       .populate("provider_id")
       .populate("service_id");
     return res;
@@ -23,11 +23,11 @@ async function getAllBookingsRepo() {
   }
 }
 
-// 🟢 Find booking by ID
+// Get a single booking by ID
 async function findBookingById(id) {
   try {
     const res = await Booking.findById(id)
-      .populate("customer_id")
+      .populate("user_id")       // changed from customer_id
       .populate("provider_id")
       .populate("service_id");
     return res;
@@ -36,8 +36,22 @@ async function findBookingById(id) {
   }
 }
 
+async function getBookingsByUserId(userId) {
+  try {
+    const res = await Booking.find({ user_id: userId })
+      .populate("user_id")
+      .populate("provider_id")
+      .populate("service_id");
+    return res || []; // return empty array if query fails
+  } catch (error) {
+    console.log("Error in getBookingsByUserId:", error);
+    return []; // prevent undefined
+  }
+}
+
 module.exports = {
   createBooking,
   getAllBookingsRepo,
-  findBookingById
+  findBookingById,
+  getBookingsByUserId
 };

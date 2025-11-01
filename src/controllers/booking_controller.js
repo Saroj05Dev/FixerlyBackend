@@ -1,11 +1,11 @@
-const { registerBooking, getAllBookingsService } = require("../services/booking_service");
+const { registerBooking, getAllBookingsService, getUserBookingsService } = require("../services/booking_service");
 
 async function addBooking(req, res) {
     try {
         const booking = await registerBooking(req.body);
         return res.status(201).json({
             success: true,
-            message: "Booking created successfully",
+            message: "Booking successfully",
             data: booking
         });
     } catch (error) {
@@ -33,4 +33,25 @@ async function getAllBookings(req, res) {
     }
 }
 
-module.exports = { addBooking, getAllBookings };
+async function getUserBookings(req, res) {
+    try {
+        const { id } = req.params;
+        const bookings = await getUserBookingsService(id);
+        return res.status(200).json({
+            success: true,
+            data: bookings.length ? bookings : [],
+            message: bookings.length
+                ? "User bookings fetched successfully"
+                : "No bookings found for this user"
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Error fetching user bookings",
+            error: error.message
+        });
+    }
+}
+
+module.exports = { addBooking, getAllBookings, getUserBookings };
+
