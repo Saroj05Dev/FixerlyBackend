@@ -1,46 +1,101 @@
-// src/controllers/booking_controller.js
-const { getCustomerBookingsService, cancelBookingService, getProviderBookingsService, updateBookingStatusService,createBookingService,
-    getAllBookingsService } = require("../services/booking_service");
+const {
+  getCustomerBookingsService,
+  cancelBookingService,
+  getProviderBookingsService,
+  updateBookingStatusService,
+  createBookingService,
+  getAllBookingsService,
+} = require("../services/booking_service");
 
 async function getCustomerBookings(req, res) {
-    try { return res.status(200).json({ success: true, data: await getCustomerBookingsService(req.user.id) }); }
-    catch (e) { return res.status(e.statusCode || 500).json({ success: false, error: e.reason }); }
+  try {
+    return res
+      .status(200)
+      .json({
+        success: true,
+        data: await getCustomerBookingsService(req.user.id),
+      });
+  } catch (e) {
+    return res
+      .status(e.statusCode || 500)
+      .json({ success: false, error: e.reason });
+  }
 }
 async function createBooking(req, res) {
-    try {
-        const booking = await createBookingService(req.user.id, req.body);
-        return res.status(201).json({ success: true, data: booking });
-    } catch (e) {
-        return res.status(e.statusCode || 500).json({ success: false, error: e.reason });
-    }
+  try {
+    const booking = await createBookingService(req.user.id, req.body);
+    return res.status(201).json({ success: true, data: booking });
+  } catch (e) {
+    return res
+      .status(e.statusCode || 500)
+      .json({ success: false, error: e.reason });
+  }
 }
-
-
 
 async function getAllBookings(req, res) {
-    try {
-        const bookings = await getAllBookingsService();
-        return res.status(200).json({ success: true, data: bookings });
-    } catch (e) {
-        return res.status(e.statusCode || 500).json({ success: false, error: e.reason });
-    }
+  try {
+    const bookings = await getAllBookingsService();
+    return res.status(200).json({ success: true, data: bookings });
+  } catch (e) {
+    return res
+      .status(e.statusCode || 500)
+      .json({ success: false, error: e.reason });
+  }
 }
 async function cancelBooking(req, res) {
-    try { return res.status(200).json({ success: true, data: await cancelBookingService(req.params.id, req.user.id) }); }
-    catch (e) { return res.status(e.statusCode || 500).json({ success: false, error: e.reason }); }
+  try {
+    return res
+      .status(200)
+      .json({
+        success: true,
+        data: await cancelBookingService(req.params.id, req.user.id),
+      });
+  } catch (e) {
+    return res
+      .status(e.statusCode || 500)
+      .json({ success: false, error: e.reason });
+  }
 }
 
 async function getProviderBookings(req, res) {
-    try { return res.status(200).json({ success: true, data: await getProviderBookingsService(req.user.id) }); }
-    catch (e) { return res.status(e.statusCode || 500).json({ success: false, error: e.reason }); }
+  try {
+    return res
+      .status(200)
+      .json({
+        success: true,
+        data: await getProviderBookingsService(req.user.id),
+      });
+  } catch (e) {
+    return res
+      .status(e.statusCode || 500)
+      .json({ success: false, error: e.reason });
+  }
 }
 
 async function updateBookingStatus(req, res) {
-    try { return res.status(200).json({ success: true, data: await updateBookingStatusService(req.params.id, req.user.id, req.body.status) }); }
-    catch (e) { return res.status(e.statusCode || 500).json({ success: false, error: e.reason }); }
+  try {
+    return res
+      .status(200)
+      .json({
+        success: true,
+        data: await updateBookingStatusService(
+          req.params.id,
+          req.user.id,
+          req.body.status
+        ),
+      });
+  } catch (e) {
+    return res
+      .status(e.statusCode || 500)
+      .json({ success: false, error: e.reason });
+  }
 }
 
-module.exports = { getCustomerBookings, cancelBooking, getProviderBookings, updateBookingStatus,
-    createBooking,    
-    getAllBookings
+module.exports = {
+  getCustomerBookings,
+  cancelBooking,
+  getProviderBookings,
+  updateBookingStatus,
+  createBooking,
+  getAllBookings,
 };

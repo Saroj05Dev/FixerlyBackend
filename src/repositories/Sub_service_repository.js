@@ -7,15 +7,24 @@ async function createSubService(subServiceData) {
 }
 
 async function getSubServiceById(id) {
-    return await SubService.findById(id).populate('serviceId');
+    return await SubService.findById(id).populate({
+        path: 'serviceId',
+        select: 'name description',
+    });
 }
 
 async function getAllSubServices() {
-    return await SubService.find().populate('serviceId').sort({ createdAt: -1 });
+    return await SubService.find().populate({
+        path: 'serviceId',
+        select: 'name description',
+    }).sort({ createdAt: -1 });
 }
 
 async function getSubServicesByServiceId(serviceId) {
-    return await SubService.find({ serviceId }).populate('serviceId');
+    return await SubService.find({ serviceId }).populate({
+        path: 'serviceId',
+        select: 'name description',
+    });
 }
 
 async function updateSubService(id, updateData) {
