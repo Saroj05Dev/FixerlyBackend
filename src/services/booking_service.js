@@ -17,7 +17,7 @@ async function registerBooking(bookingDetails) {
         long: long ?? null,
         amount,
         // status & date are set by schema defaults
-    };
+    });
 
     return await createBooking(bookingData);
 }

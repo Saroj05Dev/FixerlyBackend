@@ -5,7 +5,6 @@ async function login(req, res) {
     try {
         const user = await loginUser(loginPayload);
 
-        // Store token in cookie (optional, for browsers)
         res.cookie("authToken", user.token, {
             httpOnly: true,
             secure: false,
@@ -13,7 +12,6 @@ async function login(req, res) {
             maxAge: 1000 * 60 * 60 
         });
 
-        // 🔥 Return token in response so Thunder Client can use it
         res.status(200).json({
             success: true,
             message: "Logged in successfully",
