@@ -12,34 +12,18 @@ async function createSubService(subServiceData) {
 }
 
 async function getSubServiceById(id) {
-    try {
-        const subService = await SubService.findById(id).populate('serviceId');
-        if (!subService) throw new Error("Sub-service not found");
-        return subService;
-    } catch (error) {
-        throw error;
-    }
+    return await SubService.findById(id).populate({
+        path: 'serviceId',
+        select: 'name description',
+    });
 }
 
 async function getAllSubServices() {
-    try {
-        return await SubService.find()
-            .populate('serviceId')
-            .sort({ createdAt: -1 });
-    } catch (error) {
-        throw error;
-    }
+    return await SubService.find().populate('serviceId').sort({ createdAt: -1 });
 }
 
 async function getSubServicesByServiceId(serviceId) {
-    try {
-        const subServices = await SubService.find({ serviceId }).populate('serviceId');
-        if (!subServices || subServices.length === 0)
-            throw new Error("No sub-services found for the given service ID");
-        return subServices;
-    } catch (error) {
-        throw error;
-    }
+    return await SubService.find({ serviceId }).populate('serviceId');
 }
 
 async function updateSubService(id, updateData) {

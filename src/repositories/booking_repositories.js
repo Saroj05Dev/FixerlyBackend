@@ -1,93 +1,42 @@
-// src/repositories/booking_repository.js
 const Booking = require("../schema/booking_schema");
 
-
 async function findBookingById(id) {
-    try {
-        const booking = await Booking.findById(id);
-        if (!booking) throw new Error("Booking not found");
-        return booking;
-    } catch (error) {
-        throw new Error(`Error finding booking by ID: ${error.message}`);
-    }
+  return await Booking.findById(id);
 }
-
-
-async function getCustomerBookings(customerId) {
-    try {
-        return await Booking.find({ customer_id: customerId })
-            .populate('provider_id', 'name phone rates')
-            .populate('service_id', 'title')
-            .sort({ date: -1 });
-    } catch (error) {
-        throw new Error(`Error fetching customer bookings: ${error.message}`);
-    }
+async function getCustomerBookings(id) {
+  return await Booking.find({ customer_id: id })
+    .populate("provider_id", "name phone rates, workArea")
+    .populate("service_id", "name description")
+    .populate("customer_id", "name phone")
+    .sort({ date: -1 });
 }
-
-
-async function getProviderBookings(providerId) {
-    try {
-        return await Booking.find({ provider_id: providerId })
-            .populate('customer_id', 'name phone')
-            .populate('service_id', 'title')
-            .sort({ date: -1 });
-    } catch (error) {
-        throw new Error(`Error fetching provider bookings: ${error.message}`);
-    }
+async function getProviderBookings(id) {
+  return await Booking.find({ provider_id: id })
+    .populate("customer_id", "name phone")
+    .populate("service_id", "name description")
+    .populate("provider_id", "name phone rates, workArea")
+    .sort({ date: -1 });
 }
-
-
 async function updateBookingStatus(id, status) {
-    try {
-        const updatedBooking = await Booking.findByIdAndUpdate(id, { status }, { new: true });
-        if (!updatedBooking) throw new Error("Booking not found to update");
-        return updatedBooking;
-    } catch (error) {
-        throw new Error(`Error updating booking status: ${error.message}`);
-    }
+  return await Booking.findByIdAndUpdate(id, { status }, { new: true });
+}
+async function createBooking(bookingData) {
+  const booking = new Booking(bookingData);
+  return await booking.save();
 }
 
-// 🟢 Fetch all bookings
-async function getAllBookingsRepo() {
-  try {
-    const res = await Booking.find()
-      .populate("customer_id")
-      .populate("provider_id")
-      .populate("service_id");
-    return res;
-  } catch (error) {
-    console.log("Error in getAllBookingsRepo:", error);
-  }
+async function getAllBookings() {
+  return await Booking.find({})
+    .populate("customer_id", "name phone")
+    .populate("provider_id", "name phone rates")
+    .populate("service_id", "name")
+    .sort({ date: -1 });
 }
-
-// 🟢 Find booking by ID
-async function findBookingById(id) {
-  try {
-    const res = await Booking.findById(id)
-      .populate("customer_id")
-      .populate("provider_id")
-      .populate("service_id");
-    return res;
-  } catch (error) {
-    console.log("Error in findBookingById:", error);
-  }
-}
-
-async function getBookingsByUserId(userId) {
-  try {
-    const res = await Booking.find({ user_id: userId })
-      .populate("user_id")
-      .populate("provider_id")
-      .populate("service_id");
-    return res || []; // return empty array if query fails
-  } catch (error) {
-    console.log("Error in getBookingsByUserId:", error);
-    return []; // prevent undefined
-  }
-}
-
 module.exports = {
+  findBookingById,
+  getCustomerBookings,
+  getProviderBookings,
+  updateBookingStatus,
   createBooking,
-  getAllBookingsRepo,
-  findBookingById
+  getAllBookings,
 };

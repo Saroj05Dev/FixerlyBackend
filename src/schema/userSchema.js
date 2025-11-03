@@ -33,12 +33,23 @@ const userSchema = new mongoose.Schema({
         enum: ["user", "provider", "admin"],
         default: "user"
     },
-    isVerified: { type: Boolean, default: false },
-    kycStatus: { type: String, enum: ['pending', 'approved', 'rejected'], default: null },
+    isVerified: { 
+        type: Boolean, 
+        default: false 
+    },
+    kycStatus: { 
+        type: String, 
+        enum: ['pending', 'approved', 'rejected'], 
+        default: null 
+    },
     rates: Number,
     workArea: String,
     experienceYears: Number,
-    availability: { type: String, enum: ['online', 'offline'], default: 'offline' },
+    availability: { 
+        type: String, 
+        enum: ['online', 'offline'], 
+        default: 'offline' 
+    },
     kycDocs: [String]
 }, { timestamps: true });
 
