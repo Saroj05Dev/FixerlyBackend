@@ -7,6 +7,7 @@ const serviceRoutes = require('./routes/Service_routes');
 const subServiceRoutes = require('./routes/Sub_services_routes');
 const bookingRoutes = require('./routes/booking_routes');
 const userRouter = require('./routes/userRoutes');
+const adminRouter = require('./routes/admin_routes');
 const authRouter = require('./routes/authRoutes');
 const provideroutes = require('./routes/Provider_routes');
 const reviewroutes = require('./routes/review_routes');
@@ -25,6 +26,7 @@ app.use('/api/sub-services', subServiceRoutes);
 app.use('/api/reviews',reviewroutes);
 app.use('/api/booking', bookingRoutes);
 app.use('/api/provider',provideroutes);
+app.use('/api/admin', adminRouter)
 app.listen(ServerConfig.PORT, async () => {
     await connectDB();
     console.log(`Server started at port ${ServerConfig.PORT}...!!`);
