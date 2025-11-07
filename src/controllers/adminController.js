@@ -1,4 +1,4 @@
-const { addAdmin, fetchAllAdmins, modifyAdmin, removeAdmin } = require("../services/adminService");
+const { addAdmin, fetchAllAdmins, modifyAdmin, removeAdmin, approveProviderById } = require("../services/adminService");
 
 async function createAdmin(req, res) {
     try {
@@ -50,9 +50,24 @@ async function deleteAdmin(req, res) {
     }
 }
 
+async function approveProvider(req, res) {
+    try {
+        const providerId = req.params.id;
+        const approvedProvider = await approveProviderById(providerId);
+        return res.status(200).json({
+            success: true,
+            message: "Provider approved successfully",
+            data: approvedProvider
+        });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: error.message });
+    }
+}
+
 module.exports = {
     createAdmin,
     getAllAdmins,
     updateAdmin,
-    deleteAdmin
+    deleteAdmin,
+    approveProvider
 };

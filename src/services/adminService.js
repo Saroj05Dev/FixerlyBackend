@@ -1,5 +1,5 @@
 const bcrypt = require("bcryptjs");
-const { createAdmin, getAllAdmins, updateAdmin, deleteAdmin } = require("../repositories/adminRepository");
+const { createAdmin, getAllAdmins, updateAdmin, deleteAdmin, findByIdAndUpdate } = require("../repositories/adminRepository");
 const Admin = require("../schema/adminSchema");
 
 async function addAdmin(adminDetails) {
@@ -37,10 +37,24 @@ async function removeAdmin(id) {
     return await deleteAdmin(id);
 }
 
+async function approveProviderById(id) {
+    const provider = await Provider.findByIdAndUpdate(
+        id,
+        { status: true },
+        { new: true }
+    );
+    if (!provider) {
+        throw new Error("Provider not found");
+    }
+    return provider;
+}
+
+
 module.exports = {
     addAdmin,
     fetchAllAdmins,
     modifyAdmin,
-    removeAdmin
+    removeAdmin,
+    approveProviderById
 };
 
